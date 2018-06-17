@@ -22,7 +22,8 @@ let port = process.env.PORT || 8003;
 let buttons = {
     reply_markup: JSON.stringify({
         keyboard: [
-            [{ text: '/Спросить Чака'}],
+            [{ text: '/Chuck'}],
+            [{ text: '/RIG01'}],
         ]
     })
 };
@@ -45,8 +46,6 @@ function getJoke(msg) {
 
         await delay(500);
         bot.sendMessage(chatId, 'Fetching new joke for you...');
-        await delay(500);
-        bot.sendMessage(chatId, '...');
         await delay(1000);
 
         callback = function(response) {
@@ -66,24 +65,93 @@ function getJoke(msg) {
 
                 bot.sendMessage(chatId, res);
             });
-        }
+        };
 
         http.request(reqOptions, callback).end();
 
     })();
 }
 
+function getStats(chatID, RIGid) {
+
+
+    let str = [];
+    let request = 'https://api.nanopool.org/v1/xmr/user/'+RIGid;
+
+    https.get(request, (res) => {
+        console.log('statusCode:', res.statusCode);
+        console.log('headers:', res.headers);
+
+        res.on('data', (d) => {
+            //process.stdout.write(d);
+            let obj = JSON.parse(d);
+            console.log(obj);
+            let balance = obj.data.balance;
+            let hash = obj.data.hashrate;
+
+            (async () => {
+
+                bot.sendMessage(chatID, "RIG01 stats: ");
+                await delay(500);
+                bot.sendMessage(chatID, "Balance: " + balance + "XMR");
+                await delay(500);
+                bot.sendMessage(chatID, "Hashrate: " + hash + "h/s");
+
+            })();
 
 
 
 
-bot.onText(/\/Спросить Чака/, (msg) => {
+
+        });
+
+    }).on('error', (e) => {
+        console.error(e);
+    });
+
+}
+
+
+bot.onText(/\/Chuck/, (msg) => {
     // 'msg' is the received Message from Telegram
 
     getJoke(msg);
 
 });
 
+bot.onText(/\/RIG01/, (msg) => {
+    let chatId = config.myChatID;
+    let senderChatID = msg.chat.id;
+
+    console.log(chatId);
+    console.log(senderChatID);
+
+    if (chatId == senderChatID) {
+        (async () => {
+
+            await delay(500);
+            bot.sendMessage(chatId, 'Fetching rig stats...', buttons);
+            await delay(1000);
+            getStats(chatId ,config.RIG01_id)
+
+        })();
+    }
+    else {
+        bot.sendMessage(senderChatID, 'Request rejected, sorry.', buttons);
+    }
+
+
+
+
+});
+
+setInterval(function () {
+    getStats(config.myChatID ,config.RIG01_id)
+}, 1 * 60 * 60 * 1000); // 1 hour
+
+
+
+/*
 
 bot.on('message', (msg) => {
     const chatId = msg.chat.id;
@@ -96,3 +164,6 @@ bot.on('message', (msg) => {
     })();
 
 });
+
+
+ */
