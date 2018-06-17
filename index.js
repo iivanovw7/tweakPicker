@@ -23,7 +23,7 @@ let buttons = {
     reply_markup: JSON.stringify({
         keyboard: [
             [{ text: '/Chuck'}],
-            [{ text: '/Nanopool'}],
+            [{ text: '/PoolStats'}],
         ]
     })
 };
@@ -31,6 +31,7 @@ let buttons = {
 app.listen(8003, () => {
     console.log("Server Starts on 8003 port");
 });
+
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
@@ -75,7 +76,7 @@ function getJoke(msg) {
 function getStats(chatID, RIGid) {
 
 
-    let str = [];
+
     let request = 'https://api.nanopool.org/v1/xmr/user/'+RIGid;
 
     https.get(request, (res) => {
@@ -118,7 +119,14 @@ bot.onText(/\/Chuck/, (msg) => {
 
 });
 
-bot.onText(/\/Nanopool/, (msg) => {
+bot.onText(/\/start/, (msg) => {
+    let senderChatID = msg.chat.id;
+
+        bot.sendMessage(senderChatID, 'Dustie started...', buttons);
+
+});
+
+bot.onText(/\/PoolStats/, (msg) => {
     let chatId = config.myChatID;
     let senderChatID = msg.chat.id;
 
