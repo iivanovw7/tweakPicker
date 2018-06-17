@@ -23,7 +23,7 @@ let buttons = {
     reply_markup: JSON.stringify({
         keyboard: [
             [{ text: '/Chuck'}],
-            [{ text: '/RIG01'}],
+            [{ text: '/Nanopool'}],
         ]
     })
 };
@@ -118,7 +118,7 @@ bot.onText(/\/Chuck/, (msg) => {
 
 });
 
-bot.onText(/\/RIG01/, (msg) => {
+bot.onText(/\/Nanopool/, (msg) => {
     let chatId = config.myChatID;
     let senderChatID = msg.chat.id;
 
@@ -129,7 +129,7 @@ bot.onText(/\/RIG01/, (msg) => {
         (async () => {
 
             await delay(500);
-            bot.sendMessage(chatId, 'Fetching rig stats...', buttons);
+            bot.sendMessage(chatId, 'Fetching pool stats...', buttons);
             await delay(1000);
             getStats(chatId ,config.RIG01_id)
 
