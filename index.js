@@ -93,9 +93,9 @@ function getStats(chatID, RIGid) {
 
                 bot.sendMessage(chatID, "RIG01 stats: ");
                 await delay(500);
-                bot.sendMessage(chatID, "Balance: " + balance + "XMR");
+                bot.sendMessage(chatID, "Balance: " + balance + " XMR");
                 await delay(500);
-                bot.sendMessage(chatID, "Hashrate: " + hash + "h/s");
+                bot.sendMessage(chatID, "Hashrate: " + hash + " h/s");
 
             })();
 
