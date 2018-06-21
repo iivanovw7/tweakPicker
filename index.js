@@ -24,6 +24,7 @@ let buttons = {
         keyboard: [
             [{ text: '/Chuck'}],
             [{ text: '/PoolStats'}],
+            [{ text: '/XMRrates'}],
         ]
     })
 };
@@ -73,41 +74,75 @@ function getJoke(msg) {
     })();
 }
 
+function getPrices(chatID) {
+
+  let prices = 'https://api.nanopool.org/v1/xmr/prices';
+
+  https.get(prices, (res) => {
+    res.on('data', (d) => {
+      let obj = JSON.parse(d);
+      console.log(obj);
+      let ratesUSD = obj.data.price_usd;
+      let ratesRUR = obj.data.price_rur;
+
+      (async () => {
+        await delay (500);
+        bot.sendMessage(chatID, "1 XMR = " + ratesUSD + " USD");
+        bot.sendMessage(chatID, "1 XMR = " + ratesRUR + " RUR");
+      })();
+
+    });
+  }).on('error', (e) => {
+    console.error(e);
+    bot.sendMessage(chatID, "Something went wrong...");
+  });
+
+}
+
 function getStats(chatID, RIGid) {
 
 
 
     let request = 'https://api.nanopool.org/v1/xmr/user/'+RIGid;
+    let str = [];
 
     https.get(request, (res) => {
-        console.log('statusCode:', res.statusCode);
-        console.log('headers:', res.headers);
+        //console.log('statusCode:', res.statusCode);
+        //console.log('headers:', res.headers);
 
         res.on('data', (d) => {
-            //process.stdout.write(d);
-            let obj = JSON.parse(d);
-            console.log(obj);
-            let balance = obj.data.balance;
-            let hash = obj.data.hashrate;
-
-            (async () => {
-
-                await delay(500);
-                bot.sendMessage(chatID, "Balance: " + balance + " XMR");
-                await delay(500);
-                bot.sendMessage(chatID, "Hashrate: " + hash + " h/s");
-
-            })();
-
-
+            str += d;
 
 
 
         });
 
-    }).on('error', (e) => {
-        console.error(e);
+
+      res.on('end', (e) => {
+      (async () => {
+
+        //process.stdout.write(d);
+        let obj = JSON.parse(str);
+        console.log(obj);
+        let balance = obj.data.balance;
+        let hash = obj.data.hashrate;
+        let avHash = obj.data.avgHashrate.h6;
+
+        await delay(1000);
+        bot.sendMessage(chatID, "Balance: " + balance + " XMR");
+        await delay(500);
+        bot.sendMessage(chatID, "Hashrate: " + hash + " h/s");
+        await delay(500);
+        bot.sendMessage(chatID, "Av. Hashrate (6 hours): " + avHash + " h/s");
+        await delay(500);
+        getPrices(chatID);
+
+
+      })();
     });
+    })
+
+
 
 }
 
@@ -148,6 +183,21 @@ bot.onText(/\/PoolStats/, (msg) => {
     }
 
 
+});
+
+
+bot.onText(/\/XMRrates/, (msg) => {
+  let senderChatID = msg.chat.id;
+
+  (async () => {
+
+    await delay(500);
+    bot.sendMessage(senderChatID, 'Fetching XMR rates...', buttons);
+    await delay(1000);
+    getPrices(senderChatID);
+
+
+  })();
 
 
 });
