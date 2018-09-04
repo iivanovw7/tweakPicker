@@ -8,6 +8,7 @@ const mongoose = require("mongoose");
 const Promise = require("bluebird");
 const cors = require('cors');
 const delay = require('delay');
+import schedule from 'node-schedule'
 
 
 //----------------TweakpickerVars-------
@@ -25,6 +26,8 @@ let buttons = {
             [{ text: '/Chuck'}],
             [{ text: '/PoolStats'}],
             [{ text: '/XMRrates'}],
+            [{ text: '/Balance'}],
+
         ]
     })
 };
@@ -146,6 +149,37 @@ function getStats(chatID, RIGid) {
 
 }
 
+function getBalance(chatID, RIGid) {
+
+  let request = 'https://api.nanopool.org/v1/xmr/user/'+RIGid;
+  let str = [];
+
+  https.get(request, (res) => {
+
+    res.on('data', (d) => {
+      str += d;
+
+    });
+
+
+    res.on('end', (e) => {
+      (async () => {
+
+        let obj = JSON.parse(str);
+        console.log(obj);
+        let balance = obj.data.balance;
+
+        await delay(1000);
+        bot.sendMessage(chatID, "Balance: " + balance + " XMR");
+
+      })();
+    });
+  })
+
+
+
+}
+
 
 bot.onText(/\/Chuck/, (msg) => {
     // 'msg' is the received Message from Telegram
@@ -202,13 +236,42 @@ bot.onText(/\/XMRrates/, (msg) => {
 
 });
 
-setInterval(function () {
-    getStats(config.myChatID ,config.RIG01_id)
-}, 1 * 60 * 60 * 1000); // 1 hour
+bot.onText(/\/Balance/, (msg) => {
+  let chatId = config.myChatID;
+  let senderChatID = msg.chat.id;
+
+  console.log(chatId);
+  console.log(senderChatID);
+
+  if (chatId == senderChatID) {
+    (async () => {
+
+      await delay(500);
+      bot.sendMessage(chatId, 'Fetching your balance...', buttons);
+      await delay(1000);
+      getBalance(chatId ,config.RIG01_id)
+
+    })();
+  }
+  else {
+    bot.sendMessage(senderChatID, 'Request rejected, sorry.', buttons);
+  }
+});
 
 
+schedule.scheduleJob('0 21 * * *', () => {
+  getBalance(config.myChatID ,config.RIG01_id)
+})
+
+schedule.scheduleJob('0 15 * * *', () => {
+  getBalance(config.myChatID ,config.RIG01_id)
+})
 
 /*
+
+setInterval(function () {
+  getStats(config.myChatID ,config.RIG01_id)
+}, 1 * 60 * 60 * 1000); // 1 hour
 
 bot.on('message', (msg) => {
     const chatId = msg.chat.id;
