@@ -4,11 +4,8 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const https = require('https');
 const http = require('http');
-const mongoose = require("mongoose");
-const Promise = require("bluebird");
-const cors = require('cors');
 const delay = require('delay');
-import schedule from 'node-schedule'
+const schedule = require('node-schedule');
 
 
 //----------------TweakpickerVars-------
@@ -115,8 +112,6 @@ function getStats(chatID, RIGid) {
 
         res.on('data', (d) => {
             str += d;
-
-
 
         });
 
@@ -258,7 +253,6 @@ bot.onText(/\/Balance/, (msg) => {
   }
 });
 
-
 schedule.scheduleJob('0 21 * * *', () => {
   getBalance(config.myChatID ,config.RIG01_id)
 })
@@ -267,8 +261,10 @@ schedule.scheduleJob('0 15 * * *', () => {
   getBalance(config.myChatID ,config.RIG01_id)
 })
 
-/*
 
+
+
+/*
 setInterval(function () {
   getStats(config.myChatID ,config.RIG01_id)
 }, 1 * 60 * 60 * 1000); // 1 hour
