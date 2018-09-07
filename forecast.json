@@ -1,0 +1,246 @@
+{
+  "Headline": {
+    "EffectiveDate": "2018-09-08T13:00:00+03:00",
+    "EffectiveEpochDate": 1536400800,
+    "Severity": 5,
+    "Text": "Гроза Суббота, день",
+    "Category": "thunderstorm",
+    "EndDate": "2018-09-08T19:00:00+03:00",
+    "EndEpochDate": 1536422400,
+    "MobileLink": "http://m.accuweather.com/ru/ru/no-78/2515373/extended-weather-forecast/2515373?unit=c",
+    "Link": "http://www.accuweather.com/ru/ru/no-78/2515373/daily-weather-forecast/2515373?unit=c"
+  },
+  "DailyForecasts": [
+    {
+      "Date": "2018-09-07T07:00:00+03:00",
+      "EpochDate": 1536292800,
+      "Sun": {
+        "Rise": "2018-09-07T06:07:00+03:00",
+        "EpochRise": 1536289620,
+        "Set": "2018-09-07T19:46:00+03:00",
+        "EpochSet": 1536338760
+      },
+      "Moon": {
+        "Rise": "2018-09-07T02:03:00+03:00",
+        "EpochRise": 1536274980,
+        "Set": "2018-09-07T19:13:00+03:00",
+        "EpochSet": 1536336780,
+        "Phase": "WaningCrescent",
+        "Age": 27
+      },
+      "Temperature": {
+        "Minimum": {
+          "Value": 15.8,
+          "Unit": "C",
+          "UnitType": 17
+        },
+        "Maximum": {
+          "Value": 25.4,
+          "Unit": "C",
+          "UnitType": 17
+        }
+      },
+      "RealFeelTemperature": {
+        "Minimum": {
+          "Value": 15.5,
+          "Unit": "C",
+          "UnitType": 17
+        },
+        "Maximum": {
+          "Value": 26.2,
+          "Unit": "C",
+          "UnitType": 17
+        }
+      },
+      "RealFeelTemperatureShade": {
+        "Minimum": {
+          "Value": 15.5,
+          "Unit": "C",
+          "UnitType": 17
+        },
+        "Maximum": {
+          "Value": 24.4,
+          "Unit": "C",
+          "UnitType": 17
+        }
+      },
+      "HoursOfSun": 5.2,
+      "DegreeDaySummary": {
+        "Heating": {
+          "Value": 0,
+          "Unit": "C",
+          "UnitType": 17
+        },
+        "Cooling": {
+          "Value": 3,
+          "Unit": "C",
+          "UnitType": 17
+        }
+      },
+      "AirAndPollen": [
+        {
+          "Name": "AirQuality",
+          "Value": 0,
+          "Category": "Хорошо",
+          "CategoryValue": 1,
+          "Type": "Озон"
+        },
+        {
+          "Name": "Grass",
+          "Value": 0,
+          "Category": "Низк.",
+          "CategoryValue": 1
+        },
+        {
+          "Name": "Mold",
+          "Value": 0,
+          "Category": "Низк.",
+          "CategoryValue": 1
+        },
+        {
+          "Name": "Ragweed",
+          "Value": 0,
+          "Category": "Низк.",
+          "CategoryValue": 1
+        },
+        {
+          "Name": "Tree",
+          "Value": 0,
+          "Category": "Низк.",
+          "CategoryValue": 1
+        },
+        {
+          "Name": "UVIndex",
+          "Value": 3,
+          "Category": "Умерен.",
+          "CategoryValue": 2
+        }
+      ],
+      "Day": {
+        "Icon": 4,
+        "IconPhrase": "Переменная облачность",
+        "ShortPhrase": "Переменная облачность",
+        "LongPhrase": "Переменная облачность",
+        "PrecipitationProbability": 7,
+        "ThunderstormProbability": 0,
+        "RainProbability": 7,
+        "SnowProbability": 0,
+        "IceProbability": 0,
+        "Wind": {
+          "Speed": {
+            "Value": 5.6,
+            "Unit": "km/h",
+            "UnitType": 7
+          },
+          "Direction": {
+            "Degrees": 214,
+            "Localized": "ЮЗ",
+            "English": "SW"
+          }
+        },
+        "WindGust": {
+          "Speed": {
+            "Value": 11.1,
+            "Unit": "km/h",
+            "UnitType": 7
+          },
+          "Direction": {
+            "Degrees": 240,
+            "Localized": "ЗЮЗ",
+            "English": "WSW"
+          }
+        },
+        "TotalLiquid": {
+          "Value": 0,
+          "Unit": "mm",
+          "UnitType": 3
+        },
+        "Rain": {
+          "Value": 0,
+          "Unit": "mm",
+          "UnitType": 3
+        },
+        "Snow": {
+          "Value": 0,
+          "Unit": "cm",
+          "UnitType": 4
+        },
+        "Ice": {
+          "Value": 0,
+          "Unit": "mm",
+          "UnitType": 3
+        },
+        "HoursOfPrecipitation": 0,
+        "HoursOfRain": 0,
+        "HoursOfSnow": 0,
+        "HoursOfIce": 0,
+        "CloudCover": 70
+      },
+      "Night": {
+        "Icon": 38,
+        "IconPhrase": "Преимущественно облачно",
+        "ShortPhrase": "Растущая облачность",
+        "LongPhrase": "Растущая облачность",
+        "PrecipitationProbability": 18,
+        "ThunderstormProbability": 1,
+        "RainProbability": 18,
+        "SnowProbability": 0,
+        "IceProbability": 0,
+        "Wind": {
+          "Speed": {
+            "Value": 7.4,
+            "Unit": "km/h",
+            "UnitType": 7
+          },
+          "Direction": {
+            "Degrees": 156,
+            "Localized": "ЮЮВ",
+            "English": "SSE"
+          }
+        },
+        "WindGust": {
+          "Speed": {
+            "Value": 11.1,
+            "Unit": "km/h",
+            "UnitType": 7
+          },
+          "Direction": {
+            "Degrees": 180,
+            "Localized": "Ю",
+            "English": "S"
+          }
+        },
+        "TotalLiquid": {
+          "Value": 0,
+          "Unit": "mm",
+          "UnitType": 3
+        },
+        "Rain": {
+          "Value": 0,
+          "Unit": "mm",
+          "UnitType": 3
+        },
+        "Snow": {
+          "Value": 0,
+          "Unit": "cm",
+          "UnitType": 4
+        },
+        "Ice": {
+          "Value": 0,
+          "Unit": "mm",
+          "UnitType": 3
+        },
+        "HoursOfPrecipitation": 0,
+        "HoursOfRain": 0,
+        "HoursOfSnow": 0,
+        "HoursOfIce": 0,
+        "CloudCover": 78
+      },
+      "Sources": [
+        "AccuWeather"
+      ],
+      "MobileLink": "http://m.accuweather.com/ru/ru/no-78/2515373/daily-weather-forecast/2515373?day=1&unit=c",
+      "Link": "http://www.accuweather.com/ru/ru/no-78/2515373/daily-weather-forecast/2515373?day=1&unit=c"
+    }
+  ]
+}

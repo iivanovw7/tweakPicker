@@ -8,9 +8,14 @@ const delay = require('delay');
 const schedule = require('node-schedule');
 
 
+
+
 //----------------TweakpickerVars-------
 const TelegramBot = require('node-telegram-bot-api');
 const config = require('./config');
+//accuWeather st/petersburg location id
+const stP = '2515373';
+const getOneDayForecast = require('./forecasts.js');
 //console.log(token);
 // Create a bot that uses 'polling' to fetch new updates
 const bot = new TelegramBot(config.token, {polling: true});
@@ -24,6 +29,7 @@ let buttons = {
             [{ text: '/PoolStats'}],
             [{ text: '/XMRrates'}],
             [{ text: '/Balance'}],
+            [{ text: '/Прогноз на завтра'}],
 
         ]
     })
@@ -146,32 +152,32 @@ function getStats(chatID, RIGid) {
 
 function getBalance(chatID, RIGid) {
 
+
   let request = 'https://api.nanopool.org/v1/xmr/user/'+RIGid;
   let str = [];
 
-  https.get(request, (res) => {
 
-    res.on('data', (d) => {
-      str += d;
+    https.get(request, (res) => {
 
-    });
+      res.on('data', (d) => {
+        str += d;
 
-
-    res.on('end', (e) => {
-      (async () => {
-
-        let obj = JSON.parse(str);
-        console.log(obj);
-        let balance = obj.data.balance;
-
-        await delay(1000);
-        bot.sendMessage(chatID, "Balance: " + balance + " XMR");
-
-      })();
-    });
-  })
+      });
 
 
+      res.on('end', (e) => {
+        (async () => {
+
+          let obj = JSON.parse(str);
+          console.log(obj);
+          let balance = obj.data.balance;
+
+          await delay(1000);
+          bot.sendMessage(chatID, "Balance: " + balance + " XMR");
+
+        })();
+      });
+    })
 
 }
 
@@ -203,7 +209,7 @@ bot.onText(/\/PoolStats/, (msg) => {
             await delay(500);
             bot.sendMessage(chatId, 'Fetching pool stats...', buttons);
             await delay(1000);
-            getStats(chatId ,config.RIG01_id)
+            getStats(chatId ,config.RIG01_id, msg, senderChatID)
 
         })();
     }
@@ -238,6 +244,7 @@ bot.onText(/\/Balance/, (msg) => {
   console.log(chatId);
   console.log(senderChatID);
 
+
   if (chatId == senderChatID) {
     (async () => {
 
@@ -253,13 +260,59 @@ bot.onText(/\/Balance/, (msg) => {
   }
 });
 
-schedule.scheduleJob('0 21 * * *', () => {
+renderForecast = (msg) => {
+  let chatId = msg.chat.id;
+
+
+  (async () => {
+
+    await delay(500);
+    bot.sendMessage(chatId, 'Fetching your forecast...', buttons);
+    await delay(300);
+    bot.sendMessage(chatId, 'Санкт-Петербург', buttons);
+    getOneDayForecast(config.accuKEY, stP, 'forecast');
+    await delay(2000);
+    let forecast = require('./forecast.json');
+    bot.sendMessage(chatId, forecast.Headline.Text, buttons);
+    await delay(300);
+    let i = forecast.DailyForecasts[0];
+    //console.log(forecast.DailyForecasts[0].Date)
+    //console.log(forecast.DailyForecasts[1])
+    bot.sendMessage(chatId, 'Ночь: ' + i.Temperature.Minimum.Value + ' C, ' + ' День: ' + i.Temperature.Maximum.Value + ' C', buttons);
+    await delay(300);
+    bot.sendMessage(chatId, 'Ощущается ночью: ' + i.RealFeelTemperature.Minimum.Value + ' C', buttons);
+    await delay(300);
+    bot.sendMessage(chatId, 'Ощущается днем: ' + i.RealFeelTemperature.Maximum.Value + ' C', buttons);
+    //bot.sendMessage(chatId, 'Ощущается в тени: '+ 'Ночь - ' + i.RealFeelTemperatureShade.Minimum.Value + ' C,' + ' День - ' + i.RealFeelTemperatureShade.Maximum.Value + ' C', buttons);
+    await delay(300);
+    bot.sendMessage(chatId, 'Днем: ' + i.Day.LongPhrase, buttons);
+    await delay(300);
+    bot.sendMessage(chatId, 'Ночью: ' + i.Night.LongPhrase, buttons);
+    await delay(300);
+    bot.sendMessage(chatId, 'Полный прогноз: ' + i.MobileLink, buttons);
+
+  })();
+
+
+}
+
+bot.onText(/\/Прогноз на завтра/, (msg) => {
+  renderForecast(msg)
+});
+
+schedule.scheduleJob('0 6 * * *', () => {
   getBalance(config.myChatID ,config.RIG01_id)
-})
+});
+
+schedule.scheduleJob('0 12 * * *', () => {
+  getBalance(config.myChatID ,config.RIG01_id)
+});
 
 schedule.scheduleJob('0 15 * * *', () => {
   getBalance(config.myChatID ,config.RIG01_id)
-})
+});
+
+
 
 
 
