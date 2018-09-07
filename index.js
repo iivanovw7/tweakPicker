@@ -269,33 +269,40 @@ renderForecast = (msg) => {
     await delay(500);
     bot.sendMessage(chatId, 'Fetching your forecast...', buttons);
     await delay(500);
-    bot.sendMessage(chatId, 'Санкт-Петербург', buttons);
     getOneDayForecast(config.accuKEY, stP, 'forecast');
     await delay(2000);
     let forecast = require('./forecast.json');
-    bot.sendMessage(chatId, 'На завтра:', buttons);
-    await delay(500);
-    bot.sendMessage(chatId, forecast.Headline.Text, buttons);
-    await delay(500);
-    bot.sendMessage(chatId, 'Полный прогноз: ' + forecast.Headline.MobileLink, buttons);
-    await delay(500);
-    let i = forecast.DailyForecasts[0];
-    //console.log(forecast.DailyForecasts[0].Date)
-    //console.log(forecast.DailyForecasts[1])
-    bot.sendMessage(chatId, 'На сегодня:', buttons);
-    await delay(500);
-    bot.sendMessage(chatId, 'Ночь: ' + i.Temperature.Minimum.Value + ' C, ' + ' День: ' + i.Temperature.Maximum.Value + ' C', buttons);
-    await delay(500);
-    bot.sendMessage(chatId, 'Ощущается ночью: ' + i.RealFeelTemperature.Minimum.Value + ' C', buttons);
-    await delay(500);
-    bot.sendMessage(chatId, 'Ощущается днем: ' + i.RealFeelTemperature.Maximum.Value + ' C', buttons);
-    //bot.sendMessage(chatId, 'Ощущается в тени: '+ 'Ночь - ' + i.RealFeelTemperatureShade.Minimum.Value + ' C,' + ' День - ' + i.RealFeelTemperatureShade.Maximum.Value + ' C', buttons);
-    await delay(500);
-    bot.sendMessage(chatId, 'Днем: ' + i.Day.LongPhrase, buttons);
-    await delay(500);
-    bot.sendMessage(chatId, 'Ночью: ' + i.Night.LongPhrase, buttons);
-    await delay(500);
-    bot.sendMessage(chatId, 'Полный прогноз: ' + i.MobileLink, buttons);
+
+    if (firecast.Code === 'ServiceUnavailable') {
+      bot.sendMessage(chatId, 'Превышено максимальное количество запросов', buttons);
+    } else {
+      await delay(500);
+      bot.sendMessage(chatId, 'Санкт-Петербург', buttons);
+      await delay(500);
+      bot.sendMessage(chatId, 'На завтра:', buttons);
+      await delay(500);
+      bot.sendMessage(chatId, forecast.Headline.Text, buttons);
+      await delay(500);
+      bot.sendMessage(chatId, 'Полный прогноз: ' + forecast.Headline.MobileLink, buttons);
+      await delay(500);
+      let i = forecast.DailyForecasts[0];
+      //console.log(forecast.DailyForecasts[0].Date)
+      //console.log(forecast.DailyForecasts[1])
+      bot.sendMessage(chatId, 'На сегодня:', buttons);
+      await delay(500);
+      bot.sendMessage(chatId, 'Ночь: ' + i.Temperature.Minimum.Value + ' C, ' + ' День: ' + i.Temperature.Maximum.Value + ' C', buttons);
+      await delay(500);
+      bot.sendMessage(chatId, 'Ощущается ночью: ' + i.RealFeelTemperature.Minimum.Value + ' C', buttons);
+      await delay(500);
+      bot.sendMessage(chatId, 'Ощущается днем: ' + i.RealFeelTemperature.Maximum.Value + ' C', buttons);
+      //bot.sendMessage(chatId, 'Ощущается в тени: '+ 'Ночь - ' + i.RealFeelTemperatureShade.Minimum.Value + ' C,' + ' День - ' + i.RealFeelTemperatureShade.Maximum.Value + ' C', buttons);
+      await delay(500);
+      bot.sendMessage(chatId, 'Днем: ' + i.Day.LongPhrase, buttons);
+      await delay(500);
+      bot.sendMessage(chatId, 'Ночью: ' + i.Night.LongPhrase, buttons);
+      await delay(500);
+      bot.sendMessage(chatId, 'Полный прогноз: ' + i.MobileLink, buttons);
+    }
 
   })();
 
