@@ -273,7 +273,7 @@ renderForecast = (msg) => {
     await delay(2000);
     let forecast = require('./forecast.json');
 
-    if (firecast.Code === 'ServiceUnavailable') {
+    if (forecast.Code === 'ServiceUnavailable') {
       bot.sendMessage(chatId, 'Превышено максимальное количество запросов', buttons);
     } else {
       await delay(500);
