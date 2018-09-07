@@ -92,7 +92,7 @@ function getPrices(chatID) {
       let ratesRUR = obj.data.price_rur;
 
       (async () => {
-        await delay (500);Прогноз погоды
+        await delay (500);
         bot.sendMessage(chatID, "1 XMR = " + ratesUSD + " USD");
         bot.sendMessage(chatID, "1 XMR = " + ratesRUR + " RUR");
       })();
