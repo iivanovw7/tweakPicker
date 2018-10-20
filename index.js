@@ -26,6 +26,7 @@ let buttons = {
     reply_markup: JSON.stringify({
         keyboard: [
             [{ text: '/Chuck'}],
+            [{ text: '/Get_ChatID'}],
             [{ text: '/PoolStats'}],
             [{ text: '/XMRrates'}],
             [{ text: '/Balance'}],
@@ -189,10 +190,17 @@ bot.onText(/\/Chuck/, (msg) => {
 
 });
 
-bot.onText(/\/start/, (msg) => {
+bot.onText(/\/Get_ChatID/, (msg) => {
     let senderChatID = msg.chat.id;
 
-        bot.sendMessage(senderChatID, 'Dustie started...', buttons);
+        bot.sendMessage(senderChatID, senderChatID, buttons);
+
+});
+
+bot.onText(/\/start/, (msg) => {
+  let senderChatID = msg.chat.id;
+
+  bot.sendMessage(senderChatID, 'Dustie started...', buttons);
 
 });
 
