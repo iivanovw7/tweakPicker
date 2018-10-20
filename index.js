@@ -6,7 +6,8 @@ const https = require('https');
 const http = require('http');
 const delay = require('delay');
 const schedule = require('node-schedule');
-
+const { InlineKeyboard, ReplyKeyboard, ForceReply } = require('node-telegram-keyboard-wrapper');
+const _ = require('lodash');
 
 
 
@@ -21,10 +22,15 @@ const getOneDayForecast = require('./forecasts.js');
 const bot = new TelegramBot(config.token, {polling: true});
 
 let port = process.env.PORT || 8003;
+let shoppingList = [
+  {id:1, title: 'Товар 1'},
+  {id:2, title: 'Товар 2'},
+];
 
 let buttons = {
     reply_markup: JSON.stringify({
         keyboard: [
+            [{ text: '/Список покупок'}],
             [{ text: '/Chuck'}],
             [{ text: '/Get_ChatID'}],
             [{ text: '/PoolStats'}],
@@ -39,6 +45,8 @@ let buttons = {
 app.listen(8003, () => {
     console.log("Server Starts on 8003 port");
 });
+
+
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
@@ -335,7 +343,112 @@ schedule.scheduleJob('0 15 * * *', () => {
 
 
 
+//------------------------Shopping List functions-----------------
 
+let is_listActions_Open = false;
+let is_toDelete_Open = false;
+const listActions = new ReplyKeyboard();
+const toDeleteListing = new ReplyKeyboard();
+
+listActions
+  .addRow("/Покажи весь список")
+  .addRow("/Добавить новый товар")
+  .addRow("/Удалить товар")
+  .addRow("/Назад");
+
+
+
+
+
+bot.onText(/\/Список покупок/, (msg) => {
+  let chatId = msg.chat.id;
+  let myChatId = config.myChatID;
+  let sashaChatId = config.sashaChatID;
+
+
+
+  if (chatId == myChatId || chatId == sashaChatId) {
+    (async () => {
+
+      bot.sendMessage(chatId , "Действия со списком покупок:", listActions.open())
+        .then(function() {
+          is_listActions_Open = !is_listActions_Open;
+        });
+
+    })();
+  }
+  else {
+    bot.sendMessage(chatId, 'Request rejected, sorry.', buttons);
+  }
+
+});
+
+bot.onText(/\/Назад/, (msg) => {
+  let chatId = msg.chat.id;
+  let myChatId = config.myChatID;
+  let sashaChatId = config.sashaChatID;
+
+
+
+  if (chatId == myChatId || chatId == sashaChatId) {
+    (async () => {
+
+      bot.sendMessage(chatId , "Возвращаю в главное меню...", listActions.close())
+        .then(function() {
+          is_listActions_Open = !is_listActions_Open;
+        });
+      await delay(500);
+      bot.sendMessage(chatId, 'Готово', buttons);
+
+    })();
+  }
+  else {
+    bot.sendMessage(chatId, 'Request rejected, sorry.', buttons);
+  }
+
+});
+
+bot.onText(/\/Покажи весь список/, (msg) => {
+  let chatId = msg.chat.id;
+  let myChatId = config.myChatID;
+  let sashaChatId = config.sashaChatID;
+
+
+
+  if (chatId == myChatId || chatId == sashaChatId) {
+    (async () => {
+
+      bot.sendMessage(chatId , "Ваш списочек:", listActions.open())
+        .then(function() {
+          renderShoppingList(chatId)
+        });
+
+    })();
+  }
+  else {
+    bot.sendMessage(chatId, 'Request rejected, sorry.', buttons);
+  }
+
+});
+
+renderShoppingList = (chatId) => {
+  if (shoppingList.length === 0) {
+    bot.sendMessage(chatId, 'Список пуст!');
+  } else {
+    {_.map(shoppingList, element => {
+      bot.sendMessage(chatId, element.id + ' ' + element.title);
+    })}
+  }
+
+};
+
+renderToDeleteList = () => {
+
+    {_.map(shoppingList, element => {
+      toDeleteListing
+        .addRow("/Покажи весь список")
+    })}
+};
 
 
 /*
