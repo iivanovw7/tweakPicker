@@ -520,7 +520,7 @@ bot.on("callback_query", function(query) {
       bot.sendMessage(query.from.id, "Элемент удален из вашего списка");
     })
     .then(function() {
-      sendListNotifications(query.from.id, "удален", query.data);
+      sendListNotifications(query.from.id, "удален", query.message);
     })
 
 });
