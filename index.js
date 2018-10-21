@@ -556,11 +556,11 @@ removeElement = (index, user, action) => {
   }
 
   let value = parseInt(index, 10);
+  //console.log(_.find(shoppingList, { 'id': value}).title);
 
-  sendListNotifications(user, "удален", shoppingList[index].title);
+  sendListNotifications(user, action, _.find(shoppingList, { 'id': value}).title);
 
   removeByKey(shoppingList, {key: 'id', value: value});
-
 
 };
 
