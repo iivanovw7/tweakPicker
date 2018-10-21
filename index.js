@@ -468,6 +468,8 @@ bot.on("message", function (msg) {
         bot.sendMessage(msg.from.id, "Ваш новый список: ", listActions.open());
         await delay(500);
         renderShoppingList(chatId);
+        await delay(500);
+        sendListNotifications(msg.from.id, "добавлен", msg.text);
       })();
     }
     else {
@@ -517,6 +519,9 @@ bot.on("callback_query", function(query) {
     .then(function() {
       bot.sendMessage(query.from.id, "Элемент удален из вашего списка");
     })
+    .then(function() {
+      sendListNotifications(query.from.id, "удален", query.data);
+    })
 
 });
 
@@ -560,7 +565,17 @@ removeElement = (index) => {
 };
 
 //function sends notifications to users about changed shopping list
-sedNotifications = (rec1, rec2) => {
+sendListNotifications = (user, action, element) => {
+  let recipientID = 0;
+  if (user == config.myChatID) {
+    recipientID = config.sashaChatID
+  } else recipientID = config.myChatID;
+
+  if (action == 'удален') {
+    bot.sendMessage(recipientID, element + ' ' + action + ' из вашего списка!', buttons);
+  } else {
+    bot.sendMessage(recipientID, element + ' ' + action + ' в ваш список!', buttons);
+  }
 
 }
 
