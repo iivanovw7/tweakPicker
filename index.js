@@ -512,16 +512,14 @@ bot.onText(/\/Удалить товар/, (msg) => {
 });
 
 bot.on("callback_query", function(query) {
-  bot.answerCallbackQuery(query.id, { text: "Удаляем элемент " + query.data })
+  bot.answerCallbackQuery(query.id, { text: "Удаляем элемент " + query.data})
     .then(function() {
-      removeElement(query.data)
+      removeElement(query.data, query.from.id, "удален")
     })
     .then(function() {
       bot.sendMessage(query.from.id, "Элемент удален из вашего списка");
     })
-    .then(function() {
-      sendListNotifications(query.from.id, "удален", query.message);
-    })
+
 
 });
 
@@ -546,7 +544,7 @@ renderShoppingList = (chatId) => {
 };
 
 //function removes element from shopping list by item ID
-removeElement = (index) => {
+removeElement = (index, user, action) => {
 
   function removeByKey(array, params){
     array.some(function(item, index) {
@@ -558,6 +556,8 @@ removeElement = (index) => {
   }
 
   let value = parseInt(index, 10);
+
+  sendListNotifications(user, "удален", shoppingList[index].title);
 
   removeByKey(shoppingList, {key: 'id', value: value});
 
@@ -572,6 +572,8 @@ sendListNotifications = (user, action, element) => {
   } else recipientID = config.myChatID;
 
   if (action == 'удален') {
+
+
     bot.sendMessage(recipientID, element + ' ' + action + ' из вашего списка!', buttons);
   } else {
     bot.sendMessage(recipientID, element + ' ' + action + ' в ваш список!', buttons);
