@@ -451,9 +451,11 @@ bot.on("message", function (msg) {
   let sashaChatId = config.sashaChatID;
 
   function getNewItemId() {
-    console.log(_.maxBy(shoppingList, 'id').id + 1)
 
-    return _.maxBy(shoppingList, 'id').id + 1
+    if (shoppingList.length == 0) {
+      return 1
+    } else { return _.maxBy(shoppingList, 'id').id + 1 }
+
   }
 
   if (!!msg.reply_to_message) {
