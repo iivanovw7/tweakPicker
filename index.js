@@ -9,6 +9,10 @@ const schedule = require('node-schedule');
 const {InlineKeyboard, ReplyKeyboard, ForceReply} = require('node-telegram-keyboard-wrapper');
 const _ = require('lodash');
 
+//--------database related imports---------
+let Item = require('./db/index');
+const mongoose = require("mongoose");
+let mongoLogin = require('./mongo');
 
 //----------------TweakpickerVars---------------------------------
 const TelegramBot = require('node-telegram-bot-api');
@@ -30,24 +34,47 @@ let buttons = {
   reply_markup: JSON.stringify({
     keyboard: [
       [{text: '/Список покупок'}],
-      [{text: '/Chuck'}],
-      [{text: '/Get_ChatID'}],
-      [{text: '/PoolStats'}],
-      [{text: '/XMRrates'}],
-      [{text: '/Balance'}],
       [{text: '/Прогноз погоды'}],
-
+      [{text: '/Chuck'}],
+      [{text: '/Service'}],
     ]
   })
 };
+
+/*
+
+[{text: '/Get_ChatID'}],
+      [{text: '/PoolStats'}],
+      [{text: '/XMRrates'}],
+      [{text: '/Balance'}],
+
+
+ */
 
 app.listen(8003, () => {
   console.log("Server Starts on 8003 port");
 });
 
+mongoose.connect(mongoLogin.dbRoot(), {}, () => {
+  console.log(
+    `dbRoot: ${mongoLogin.dbRoot()}`
+  );
+  console.log("DB is connected");
+});
+
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
+
+//Main functions -----------------------------------------------------------------
+
+bot.onText(/\/start/, (msg) => {
+  let senderChatID = msg.chat.id;
+
+  bot.sendMessage(senderChatID, 'Dustie started...', buttons);
+
+});
+
 
 function getJoke(msg) {
   const chatId = msg.chat.id;
@@ -87,6 +114,74 @@ function getJoke(msg) {
   })();
 }
 
+
+bot.onText(/\/Chuck/, (msg) => {
+
+  getJoke(msg);
+
+});
+
+
+//Scheduled functions----------------------------------------------------------
+
+schedule.scheduleJob('0 6 * * *', () => {
+  getBalance(config.myChatID, config.RIG01_id)
+});
+
+schedule.scheduleJob('0 12 * * *', () => {
+  getBalance(config.myChatID, config.RIG01_id)
+});
+
+schedule.scheduleJob('0 15 * * *', () => {
+  getBalance(config.myChatID, config.RIG01_id)
+});
+
+
+//-----------------------------------------------------------------------------
+
+//Service menu functions-------------------------------------------------------
+
+//Service menu keyboard
+
+let serviceKeyboard_Open = false;
+const serviceActions = new ReplyKeyboard();
+
+serviceActions
+  .addRow("/Get_ChatID")
+  .addRow("/PoolStats")
+  .addRow("/XMRrates")
+  .addRow("/Balance")
+  .addRow("/Назад");
+
+bot.onText(/\/Service/, (msg) => {
+  let chatId = msg.chat.id;
+  let myChatId = config.myChatID;
+  let sashaChatId = config.sashaChatID;
+
+
+  if (chatId == myChatId || chatId == sashaChatId) {
+    (async () => {
+
+      bot.sendMessage(chatId, "Service menu...", serviceActions.open())
+        .then(function () {
+          serviceKeyboard_Open = !serviceKeyboard_Open;
+        });
+
+    })();
+  }
+  else {
+    bot.sendMessage(chatId, 'Request rejected, sorry.', buttons);
+  }
+
+});
+
+bot.onText(/\/Get_ChatID/, (msg) => {
+  let senderChatID = msg.chat.id;
+
+  bot.sendMessage(senderChatID, senderChatID, serviceActions.open());
+
+});
+
 function getPrices(chatID) {
 
   let prices = 'https://api.nanopool.org/v1/xmr/prices';
@@ -100,8 +195,8 @@ function getPrices(chatID) {
 
       (async () => {
         await delay(500);
-        bot.sendMessage(chatID, "1 XMR = " + ratesUSD + " USD");
-        bot.sendMessage(chatID, "1 XMR = " + ratesRUR + " RUR");
+        bot.sendMessage(chatID, "1 XMR = " + ratesUSD + " USD", serviceActions.open());
+        bot.sendMessage(chatID, "1 XMR = " + ratesRUR + " RUR", serviceActions.open());
       })();
 
     });
@@ -119,8 +214,6 @@ function getStats(chatID, RIGid) {
   let str = [];
 
   https.get(request, (res) => {
-    //console.log('statusCode:', res.statusCode);
-    //console.log('headers:', res.headers);
 
     res.on('data', (d) => {
       str += d;
@@ -131,7 +224,7 @@ function getStats(chatID, RIGid) {
     res.on('end', (e) => {
       (async () => {
 
-        //process.stdout.write(d);
+
         let obj = JSON.parse(str);
         console.log(obj);
         let balance = obj.data.balance;
@@ -139,11 +232,11 @@ function getStats(chatID, RIGid) {
         let avHash = obj.data.avgHashrate.h6;
 
         await delay(1000);
-        bot.sendMessage(chatID, "Balance: " + balance + " XMR");
+        bot.sendMessage(chatID, "Balance: " + balance + " XMR", serviceActions.open());
         await delay(500);
-        bot.sendMessage(chatID, "Hashrate: " + hash + " h/s");
+        bot.sendMessage(chatID, "Hashrate: " + hash + " h/s", serviceActions.open());
         await delay(500);
-        bot.sendMessage(chatID, "Av. Hashrate (6 hours): " + avHash + " h/s");
+        bot.sendMessage(chatID, "Av. Hashrate (6 hours): " + avHash + " h/s", serviceActions.open());
         await delay(500);
         getPrices(chatID);
 
@@ -178,7 +271,7 @@ function getBalance(chatID, RIGid) {
         let balance = obj.data.balance;
 
         await delay(1000);
-        bot.sendMessage(chatID, "Balance: " + balance + " XMR");
+        bot.sendMessage(chatID, "Balance: " + balance + " XMR", serviceActions.open());
 
       })();
     });
@@ -187,25 +280,6 @@ function getBalance(chatID, RIGid) {
 }
 
 
-bot.onText(/\/Chuck/, (msg) => {
-
-  getJoke(msg);
-
-});
-
-bot.onText(/\/Get_ChatID/, (msg) => {
-  let senderChatID = msg.chat.id;
-
-  bot.sendMessage(senderChatID, senderChatID, buttons);
-
-});
-
-bot.onText(/\/start/, (msg) => {
-  let senderChatID = msg.chat.id;
-
-  bot.sendMessage(senderChatID, 'Dustie started...', buttons);
-
-});
 
 bot.onText(/\/PoolStats/, (msg) => {
   let chatId = config.myChatID;
@@ -218,14 +292,14 @@ bot.onText(/\/PoolStats/, (msg) => {
     (async () => {
 
       await delay(500);
-      bot.sendMessage(chatId, 'Fetching pool stats...', buttons);
+      bot.sendMessage(chatId, 'Fetching pool stats...', serviceActions.open());
       await delay(1000);
       getStats(chatId, config.RIG01_id, msg, senderChatID)
 
     })();
   }
   else {
-    bot.sendMessage(senderChatID, 'Request rejected, sorry.', buttons);
+    bot.sendMessage(senderChatID, 'Request rejected, sorry.', serviceActions.open());
   }
 
 
@@ -233,18 +307,17 @@ bot.onText(/\/PoolStats/, (msg) => {
 
 
 bot.onText(/\/XMRrates/, (msg) => {
+
   let senderChatID = msg.chat.id;
 
   (async () => {
 
     await delay(500);
-    bot.sendMessage(senderChatID, 'Fetching XMR rates...', buttons);
+    bot.sendMessage(senderChatID, 'Fetching XMR rates...', serviceActions.open());
     await delay(1000);
     getPrices(senderChatID);
 
-
   })();
-
 
 });
 
@@ -260,16 +333,20 @@ bot.onText(/\/Balance/, (msg) => {
     (async () => {
 
       await delay(500);
-      bot.sendMessage(chatId, 'Fetching your balance...', buttons);
+      bot.sendMessage(chatId, 'Fetching your balance...', serviceActions.open());
       await delay(1000);
       getBalance(chatId, config.RIG01_id)
 
     })();
   }
   else {
-    bot.sendMessage(senderChatID, 'Request rejected, sorry.', buttons);
+    bot.sendMessage(senderChatID, 'Request rejected, sorry.', serviceActions.open());
   }
 });
+
+
+
+//Weather forecast function-------------------------------------------
 
 renderForecast = (msg) => {
   let chatId = msg.chat.id;
@@ -320,25 +397,18 @@ renderForecast = (msg) => {
 
 }
 
+
+
 bot.onText(/\/Прогноз погоды/, (msg) => {
   renderForecast(msg)
 });
 
-schedule.scheduleJob('0 6 * * *', () => {
-  getBalance(config.myChatID, config.RIG01_id)
-});
-
-schedule.scheduleJob('0 12 * * *', () => {
-  getBalance(config.myChatID, config.RIG01_id)
-});
-
-schedule.scheduleJob('0 15 * * *', () => {
-  getBalance(config.myChatID, config.RIG01_id)
-});
 
 
-//------------------------Shopping List functions-----------------
-//----------------------------------------------------------------
+
+//------------------------Shopping List functions-----------------------------------
+//----------------------------------------------------------------------------------
+
 
 
 let is_listActions_Open = false;
@@ -351,7 +421,8 @@ listActions
   .addRow("/Назад");
 
 
-//rendering shopping list menu-----------------------------------
+//Rendering shopping list menu
+
 bot.onText(/\/Список покупок/, (msg) => {
   let chatId = msg.chat.id;
   let myChatId = config.myChatID;
@@ -374,7 +445,8 @@ bot.onText(/\/Список покупок/, (msg) => {
 
 });
 
-//return to main menu----------------------------------------------
+//Return to main menu
+
 bot.onText(/\/Назад/, (msg) => {
   let chatId = msg.chat.id;
   let myChatId = config.myChatID;
@@ -400,7 +472,8 @@ bot.onText(/\/Назад/, (msg) => {
 });
 
 
-//Show items list--------------------------------------------------
+//Shows items list
+
 bot.onText(/\/Покажи весь список/, (msg) => {
   let chatId = msg.chat.id;
   let myChatId = config.myChatID;
@@ -424,7 +497,8 @@ bot.onText(/\/Покажи весь список/, (msg) => {
 });
 
 
-//Add new item to the list----------------------------------------
+//Add new item to the list
+
 bot.onText(/\/Добавить новый товар/, (msg) => {
   let chatId = msg.chat.id;
   let myChatId = config.myChatID;
@@ -458,6 +532,11 @@ bot.on("message", function (msg) {
 
   }
 
+  function saveData(index) {
+    let item = new Item(index);
+    item.save();
+  }
+
   if (!!msg.reply_to_message) {
 
     if (chatId == myChatId || chatId == sashaChatId) {
@@ -465,7 +544,16 @@ bot.on("message", function (msg) {
         await delay(500);
         bot.sendMessage(chatId, "Ок, добавляем " + msg.text, listActions.open());
         await delay(500);
-        shoppingList.push({id: getNewItemId(), title: msg.text});
+
+        let ID = getNewItemId();
+
+        let NewItem = {
+          _id: ID,
+          title: msg.text
+        };
+        saveData(NewItem);
+
+
         await delay(500);
         bot.sendMessage(msg.from.id, "Ваш новый список: ", listActions.open());
         await delay(500);
@@ -482,20 +570,47 @@ bot.on("message", function (msg) {
 
 });
 
-//Remove item from the list----------------------------------------
+//Remove item from the list
+
 bot.onText(/\/Удалить товар/, (msg) => {
   let toDeleteListing = new InlineKeyboard();
   let chatId = msg.chat.id;
   let myChatId = config.myChatID;
   let sashaChatId = config.sashaChatID;
+  let items = [];
 
-
-  _.map(shoppingList, element => {
-    toDeleteListing
-      .addRow(
-        {text: element.title.toString(), callback_data: element.id.toString()}
+  Item.find({}, function(err, Items){
+    if (err)
+      return (
+        bot.sendMessage(chatId, 'Что то пошло не так =(')
       );
+    if (Items) {
+
+      if (Items.length === 0) {
+        bot.sendMessage(chatId, 'Список пуст!', listActions.open());
+      } else {
+        console.log("Items count : " + Items.length);
+        console.log(Items);
+        items = Items;
+
+        renderToDeleteList()
+      }
+
+
+    }
   });
+
+  function renderToDeleteList() {
+    _.map(items, element => {
+      toDeleteListing
+        .addRow(
+          {text: element.title.toString(), callback_data: element._id.toString()}
+        );
+    });
+  }
+
+
+
 
 
   if (chatId == myChatId || chatId == sashaChatId) {
@@ -511,10 +626,12 @@ bot.onText(/\/Удалить товар/, (msg) => {
     bot.sendMessage(chatId, 'Request rejected, sorry.', buttons);
   }
 
+
+
 });
 
 bot.on("callback_query", function(query) {
-  bot.answerCallbackQuery(query.id, { text: "Удаляем элемент " + query.data})
+  bot.answerCallbackQuery(query.id, { text: "Удаляем элемент"})
     .then(function() {
       removeElement(query.data, query.from.id, "удален")
     })
@@ -525,44 +642,89 @@ bot.on("callback_query", function(query) {
 
 });
 
-//show full shopping list-------------------------------------------
+//show full shopping list
+
 renderShoppingList = (chatId) => {
 
+  let items = [];
   let list = '';
   let nmb = 1;
 
-  _.map(shoppingList, element => {
-    list += nmb + ' ' + element.title + '\n';
-    nmb++
+  Item.find({}, function(err, Items){
+    if (err)
+      return (
+        bot.sendMessage(chatId, 'Что то пошло не так =(')
+      );
+    if (Items) {
+
+      if (Items.length === 0) {
+        bot.sendMessage(chatId, 'Список пуст!', listActions.open());
+      } else {
+        console.log("Items count : " + Items.length);
+        console.log(Items);
+        items = Items;
+
+        renderFinalList()
+      }
+
+
+    }
   });
 
+  function renderFinalList() {
+    _.map(items, element => {
+      list += element.title + '\n';
+      nmb++
+    });
 
-  if (shoppingList.length === 0) {
-    bot.sendMessage(chatId, 'Список пуст!');
-  } else {
-    bot.sendMessage(chatId, list, listActions.open());
+    if (shoppingList.length === 0) {
+      bot.sendMessage(chatId, 'Список пуст!');
+    } else {
+      bot.sendMessage(chatId, list, listActions.open());
+    }
   }
+
+
 
 };
 
+
+
+
 //function removes element from shopping list by item ID
+
 removeElement = (index, user, action) => {
 
-  function removeByKey(array, params){
-    array.some(function(item, index) {
-      if(array[index][params.key] === params.value){
-        array.splice(index, 1);
+  let value = parseInt(index, 10);
+
+  function removeByKey(params){
+
+    console.log(params.value);
+
+    Item.findByIdAndRemove(params.value, function(err) {
+      if (err) {
+        return done(err);
       }
     });
-    return array;
+
+
   }
 
-  let value = parseInt(index, 10);
-  //console.log(_.find(shoppingList, { 'id': value}).title);
+  Item.findById(value, function (err, item) {
+    if (err) {
+      return done(err);
+    }
+    if (item) {
+      (async () => {
+        sendListNotifications(user, action, item.title);
+        await delay(1000);
+        removeByKey({value: value});
+      })();
 
-  sendListNotifications(user, action, _.find(shoppingList, { 'id': value}).title);
+    }
+  });
 
-  removeByKey(shoppingList, {key: 'id', value: value});
+
 
 };
 
@@ -581,5 +743,7 @@ sendListNotifications = (user, action, element) => {
     bot.sendMessage(recipientID, element + ' ' + action + ' в ваш список!', buttons);
   }
 
-}
+};
+
+
 
