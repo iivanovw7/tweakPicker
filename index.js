@@ -8,6 +8,7 @@ const delay = require('delay');
 const schedule = require('node-schedule');
 const {InlineKeyboard, ReplyKeyboard, ForceReply} = require('node-telegram-keyboard-wrapper');
 const _ = require('lodash');
+const moment = require('moment');
 
 let randomId = require('random-id');
 let len = 20;
@@ -487,7 +488,7 @@ bot.onText(/\/Добавить новый товар/, (msg) => {
 
 bot.on("message", function (msg) {
   let chatId = msg.chat.id;
-  let date = new Date(year, month, day);
+  let date = moment().format('dddd, MMMM Do YYYY');
 
   function saveData(index) {
     let item = new Item(index);
@@ -613,7 +614,7 @@ renderShoppingList = (chatId) => {
       nmb++
     });
 
-    if (shoppingList.length === 0) {
+    if (items.length === 0) {
       bot.sendMessage(chatId, 'Список пуст!');
     } else {
       bot.sendMessage(chatId, list, listActions.open());
