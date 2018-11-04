@@ -286,19 +286,14 @@ bot.onText(/\/PoolStats/, (msg) => {
   console.log(chatId);
   console.log(senderChatID);
 
-  if (chatId == senderChatID) {
-    (async () => {
+  (async () => {
 
-      await delay(500);
-      bot.sendMessage(chatId, 'Fetching pool stats...', serviceActions.open());
-      await delay(1000);
-      getStats(chatId, config.RIG01_id, msg, senderChatID)
+    await delay(500);
+    bot.sendMessage(chatId, 'Fetching pool stats...', serviceActions.open());
+    await delay(1000);
+    getStats(chatId, config.RIG01_id, msg, senderChatID)
 
-    })();
-  }
-  else {
-    bot.sendMessage(senderChatID, 'Request rejected, sorry.', serviceActions.open());
-  }
+  })();
 
 
 });
@@ -326,20 +321,15 @@ bot.onText(/\/Balance/, (msg) => {
   console.log(chatId);
   console.log(senderChatID);
 
+  (async () => {
 
-  if (chatId == senderChatID) {
-    (async () => {
+    await delay(500);
+    bot.sendMessage(chatId, 'Fetching your balance...', serviceActions.open());
+    await delay(1000);
+    getBalance(chatId, config.RIG01_id)
 
-      await delay(500);
-      bot.sendMessage(chatId, 'Fetching your balance...', serviceActions.open());
-      await delay(1000);
-      getBalance(chatId, config.RIG01_id)
+  })();
 
-    })();
-  }
-  else {
-    bot.sendMessage(senderChatID, 'Request rejected, sorry.', serviceActions.open());
-  }
 });
 
 
@@ -393,7 +383,7 @@ renderForecast = (msg) => {
   })();
 
 
-}
+};
 
 
 
@@ -447,25 +437,18 @@ bot.onText(/\/Список покупок/, (msg) => {
 
 bot.onText(/\/Назад/, (msg) => {
   let chatId = msg.chat.id;
-  let myChatId = config.myChatID;
-  let sashaChatId = config.sashaChatID;
 
 
-  if (chatId == myChatId || chatId == sashaChatId) {
-    (async () => {
+  (async () => {
 
-      bot.sendMessage(chatId, "Возвращаю в главное меню...", listActions.close())
-        .then(function () {
-          is_listActions_Open = !is_listActions_Open;
-        });
-      await delay(500);
-      bot.sendMessage(chatId, 'Выполнено', buttons);
+    bot.sendMessage(chatId, "Возвращаю в главное меню...", listActions.close())
+      .then(function () {
+        is_listActions_Open = !is_listActions_Open;
+      });
+    await delay(500);
+    bot.sendMessage(chatId, 'Выполнено', buttons);
 
-    })();
-  }
-  else {
-    bot.sendMessage(chatId, 'Request rejected, sorry.', buttons);
-  }
+  })();
 
 });
 
@@ -474,23 +457,16 @@ bot.onText(/\/Назад/, (msg) => {
 
 bot.onText(/\/Покажи весь список/, (msg) => {
   let chatId = msg.chat.id;
-  let myChatId = config.myChatID;
-  let sashaChatId = config.sashaChatID;
 
 
-  if (chatId == myChatId || chatId == sashaChatId) {
-    (async () => {
+  (async () => {
 
-      bot.sendMessage(chatId, "Ваш списочек:", listActions.open())
-        .then(function () {
-          renderShoppingList(chatId)
-        });
+    bot.sendMessage(chatId, "Ваш списочек:", listActions.open())
+      .then(function () {
+        renderShoppingList(chatId)
+      });
 
-    })();
-  }
-  else {
-    bot.sendMessage(chatId, 'Request rejected, sorry.', buttons);
-  }
+  })();
 
 });
 
@@ -499,31 +475,19 @@ bot.onText(/\/Покажи весь список/, (msg) => {
 
 bot.onText(/\/Добавить новый товар/, (msg) => {
   let chatId = msg.chat.id;
-  let myChatId = config.myChatID;
-  let sashaChatId = config.sashaChatID;
+
+  (async () => {
+
+    bot.sendMessage(chatId, "Что хотите добавить ?", (new ForceReply()).export());
 
 
-  if (chatId == myChatId || chatId == sashaChatId) {
-    (async () => {
-
-      bot.sendMessage(chatId, "Что хотите добавить ?", (new ForceReply()).export());
-
-
-    })();
-  }
-  else {
-    bot.sendMessage(chatId, 'Request rejected, sorry.', buttons);
-  }
+  })();
 
 });
 
 bot.on("message", function (msg) {
   let chatId = msg.chat.id;
-  let myChatId = config.myChatID;
-  let sashaChatId = config.sashaChatID;
-
-
-
+  let date = new Date(year, month, day);
 
   function saveData(index) {
     let item = new Item(index);
@@ -533,30 +497,25 @@ bot.on("message", function (msg) {
 
   if (!!msg.reply_to_message) {
 
-    if (chatId == myChatId || chatId == sashaChatId) {
-      (async () => {
-        await delay(500);
-        bot.sendMessage(chatId, "Ок, добавляем " + msg.text, listActions.open());
-        await delay(500);
+    (async () => {
+      await delay(500);
+      bot.sendMessage(chatId, "Ок, добавляем " + msg.text, listActions.open());
+      await delay(500);
 
-        let NewItem = {
-          _id: randomId(len, pattern),
-          title: msg.text
-        };
-        await delay(1000);
-        saveData(NewItem);
-
-        await delay(500);
-        bot.sendMessage(msg.from.id, "Ваш новый список: ", listActions.open());
-        await delay(500);
-        renderShoppingList(chatId);
-        await delay(500);
-        sendListNotifications(msg.from.id, "добавлен", msg.text);
-      })();
-    }
-    else {
-      bot.sendMessage(chatId, 'Request rejected, sorry.', buttons);
-    }
+      let NewItem = {
+        _id: randomId(len, pattern),
+        title: msg.text,
+        posted_at: date
+      };
+      await delay(500);
+      saveData(NewItem);
+      await delay(500);
+      bot.sendMessage(msg.from.id, "Ваш список теперь выглядит так: ", listActions.open());
+      await delay(500);
+      renderShoppingList(chatId);
+      await delay(500);
+      sendListNotifications(msg.from.id, "добавлен", msg.text);
+    })();
 
   }
 
@@ -567,8 +526,6 @@ bot.on("message", function (msg) {
 bot.onText(/\/Удалить товар/, (msg) => {
   let toDeleteListing = new InlineKeyboard();
   let chatId = msg.chat.id;
-  let myChatId = config.myChatID;
-  let sashaChatId = config.sashaChatID;
   let items = [];
 
   Item.find({}, function(err, Items){
@@ -588,7 +545,6 @@ bot.onText(/\/Удалить товар/, (msg) => {
         renderToDeleteList()
       }
 
-
     }
   });
 
@@ -601,24 +557,13 @@ bot.onText(/\/Удалить товар/, (msg) => {
     });
   }
 
+  (async () => {
+
+    await delay(500);
+    bot.sendMessage(chatId, "Что удаляем ?", toDeleteListing.export());
 
 
-
-
-  if (chatId == myChatId || chatId == sashaChatId) {
-    (async () => {
-
-      await delay(500);
-      bot.sendMessage(chatId, "Что удаляем ?", toDeleteListing.export());
-
-
-    })();
-  }
-  else {
-    bot.sendMessage(chatId, 'Request rejected, sorry.', buttons);
-  }
-
-
+  })();
 
 });
 
@@ -630,7 +575,6 @@ bot.on("callback_query", function(query) {
     .then(function() {
       bot.sendMessage(query.from.id, "Элемент удален из вашего списка");
     })
-
 
 });
 
@@ -659,12 +603,10 @@ renderShoppingList = (chatId) => {
         renderFinalList()
       }
 
-
     }
   });
 
   function renderFinalList() {
-
 
     _.map(items, element => {
       list += element.title + '\n';
@@ -693,7 +635,6 @@ removeElement = (index, user, action) => {
 
   function removeByKey(params){
 
-    console.log(params.value);
 
     Item.findByIdAndRemove(params.value, function(err) {
       if (err) {
