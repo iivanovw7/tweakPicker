@@ -9,6 +9,10 @@ const schedule = require('node-schedule');
 const {InlineKeyboard, ReplyKeyboard, ForceReply} = require('node-telegram-keyboard-wrapper');
 const _ = require('lodash');
 
+let randomId = require('random-id');
+let len = 20;
+let pattern = '0';
+
 //--------database related imports---------
 let Item = require('./db/index');
 const mongoose = require("mongoose");
@@ -24,11 +28,13 @@ const getOneDayForecast = require('./forecasts.js');
 // Create a bot that uses 'polling' to fetch new updates----------
 const bot = new TelegramBot(config.token, {polling: true});
 
-let port = process.env.PORT || 8003;
+
+
 let shoppingList = [
   {id: 1, title: 'Товар 1'},
   {id: 2, title: 'Товар 2'},
 ];
+
 
 let buttons = {
   reply_markup: JSON.stringify({
@@ -41,17 +47,9 @@ let buttons = {
   })
 };
 
-/*
-
-[{text: '/Get_ChatID'}],
-      [{text: '/PoolStats'}],
-      [{text: '/XMRrates'}],
-      [{text: '/Balance'}],
 
 
- */
-
-app.listen(8003, () => {
+app.listen(8005, () => {
   console.log("Server Starts on 8003 port");
 });
 
@@ -524,18 +522,14 @@ bot.on("message", function (msg) {
   let myChatId = config.myChatID;
   let sashaChatId = config.sashaChatID;
 
-  function getNewItemId() {
 
-    if (shoppingList.length == 0) {
-      return 1
-    } else { return _.maxBy(shoppingList, 'id').id + 1 }
 
-  }
 
   function saveData(index) {
     let item = new Item(index);
     item.save();
   }
+
 
   if (!!msg.reply_to_message) {
 
@@ -545,14 +539,12 @@ bot.on("message", function (msg) {
         bot.sendMessage(chatId, "Ок, добавляем " + msg.text, listActions.open());
         await delay(500);
 
-        let ID = getNewItemId();
-
         let NewItem = {
-          _id: ID,
+          _id: randomId(len, pattern),
           title: msg.text
         };
+        await delay(1000);
         saveData(NewItem);
-
 
         await delay(500);
         bot.sendMessage(msg.from.id, "Ваш новый список: ", listActions.open());
@@ -672,6 +664,8 @@ renderShoppingList = (chatId) => {
   });
 
   function renderFinalList() {
+
+
     _.map(items, element => {
       list += element.title + '\n';
       nmb++
