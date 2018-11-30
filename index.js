@@ -490,32 +490,53 @@ bot.on("message", function (msg) {
   let chatId = msg.chat.id;
   let date = moment().format('dddd, MMMM Do YYYY');
 
-  function saveData(index) {
-    let item = new Item(index);
-    item.save();
+  let saveData = function (index) {
+
+    (async () => {
+      let item = new Item(index);
+      item.save();
+      await delay(500);
+      bot.sendMessage(msg.from.id, "Ваш список теперь выглядит так: ", listActions.open());
+      await delay(500);
+      return renderShoppingList(chatId)
+    })();
+
+  };
+
+  function getItemContent(title) {
+
+    let NewItem = {
+      _id: randomId(len, pattern),
+      title: title,
+      posted_at: date
+    };
+
+    (async () => {
+
+      sendListNotifications(msg.from.id, "добавлен", title);
+      await delay(500);
+      saveData(NewItem)
+    })();
+
   }
 
 
   if (!!msg.reply_to_message) {
 
+    //console.log(msg)
+
     (async () => {
-      await delay(500);
-      bot.sendMessage(chatId, "Ок, добавляем " + msg.text, listActions.open());
+
       await delay(500);
 
-      let NewItem = {
-        _id: randomId(len, pattern),
-        title: msg.text,
-        posted_at: date
-      };
-      await delay(500);
-      saveData(NewItem);
-      await delay(500);
-      bot.sendMessage(msg.from.id, "Ваш список теперь выглядит так: ", listActions.open());
-      await delay(500);
-      renderShoppingList(chatId);
-      await delay(500);
-      sendListNotifications(msg.from.id, "добавлен", msg.text);
+      if (msg.text) {
+        getItemContent(msg.text)
+      } else if (msg.sticker) {
+        getItemContent(msg.sticker.emoji)
+      } else {
+        bot.sendMessage(chatId, "Неверный формат ввода, введите текст.", listActions.open());
+      }
+
     })();
 
   }
