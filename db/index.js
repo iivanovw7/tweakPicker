@@ -1,9 +1,20 @@
 const mongoose = require("mongoose");
 
-let Item = mongoose.model('Item', {
+const Item = mongoose.model('Item', {
   _id: Number,
   title: String,
   posted_at: String
 });
 
-module.exports = Item;
+
+const Meters = mongoose.model('Meters', {
+  id: Number,
+  address: String,
+  hot: Number,
+  cold: Number
+}, "Meters");
+
+module.exports = {
+  Meters: Meters,
+  Item: Item
+};

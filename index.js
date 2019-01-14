@@ -15,9 +15,10 @@ let len = 20;
 let pattern = '0';
 
 //--------database related imports---------
-let Item = require('./db/index');
+let models = require('./db/index');
 const mongoose = require("mongoose");
 let mongoLogin = require('./mongo');
+let metersLogin = require('./meters');
 
 //----------------TweakpickerVars---------------------------------
 const TelegramBot = require('node-telegram-bot-api');
@@ -28,13 +29,6 @@ const getOneDayForecast = require('./forecasts.js');
 //console.log(token);
 // Create a bot that uses 'polling' to fetch new updates----------
 const bot = new TelegramBot(config.token, {polling: true});
-
-
-
-let shoppingList = [
-  {id: 1, title: 'Товар 1'},
-  {id: 2, title: 'Товар 2'},
-];
 
 
 let buttons = {
@@ -58,9 +52,16 @@ mongoose.connect(mongoLogin.dbRoot(), {}, () => {
   console.log(
     `dbRoot: ${mongoLogin.dbRoot()}`
   );
-  console.log("DB is connected");
+  console.log("Main DB is connected");
 });
 
+
+mongoose.connect(metersLogin.dbRoot(), {}, () => {
+  console.log(
+    `dbRoot: ${metersLogin.dbRoot()}`
+  );
+  console.log("Meters DB is connected");
+});
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
@@ -92,12 +93,12 @@ function getJoke(msg) {
     callback = function (response) {
       let str = [];
 
-      //another chunk of data has been recieved, so append it to `str`
+      //another chunk of data has been received, so append it to `str`
       response.on('data', function (chunk) {
         str += chunk;
       });
 
-      //the whole response has been recieved, so we just print it out here
+      //the whole response has been received, so we just print it out here
       response.on('end', function () {
         console.log(str);
 
@@ -146,10 +147,9 @@ let serviceKeyboard_Open = false;
 const serviceActions = new ReplyKeyboard();
 
 serviceActions
-  .addRow("/Get_ChatID")
-  .addRow("/PoolStats")
-  .addRow("/XMRrates")
-  .addRow("/Balance")
+  .addRow("/Get_ChatID", "/PoolStats")
+  .addRow("/XMRrates", "/Balance")
+  .addRow("/Счетчики")
   .addRow("/Назад");
 
 bot.onText(/\/Service/, (msg) => {
@@ -334,6 +334,72 @@ bot.onText(/\/Balance/, (msg) => {
 });
 
 
+bot.onText(/\/Счетчики/, (msg) => {
+  let chatId = config.myChatID;
+  let senderChatID = msg.chat.id;
+
+  console.log(chatId);
+  console.log(senderChatID);
+
+  (async () => {
+
+    await delay(500);
+    bot.sendMessage(chatId, 'Загружаю показания...', serviceActions.open());
+    await delay(1000);
+    getMetersData(chatId)
+
+  })();
+
+});
+
+//Rasp-meters functions-----------------------------------------------
+
+function getMetersData(chatID) {
+
+  let coldVal = 0;
+  let hotVal = 0;
+  //let address = '';
+
+
+  const id = '5c2bd186e7179a49f40a90e3';
+  models.Meters.findById(id, function (err, Meter) {
+    //console.log("Getting meters data...");
+    if (err) {
+      return err;
+    }
+
+    if (Meter) {
+
+
+      (async () => {
+
+        await delay(500);
+        console.log(Meter);
+        coldVal = Meter.cold;
+        hotVal = Meter.hot;
+        await delay(100);
+        bot.sendMessage(chatID, 'Адрес: ' + Meter.address);
+        await delay(100);
+        showInitialStates();
+
+      })();
+
+
+    }
+
+  });
+
+  function showInitialStates() {
+    console.log('Cold water: ' + (coldVal/100));
+    console.log('Hot water: ' + (hotVal/100));
+    bot.sendMessage(chatID, 'Холодная вода: ' + (coldVal/100) + ' m3', serviceActions.open());
+    bot.sendMessage(chatID, 'Горячая  вода: ' + (hotVal/100) + ' m3', serviceActions.open());
+  }
+
+}
+
+
+//
 
 //Weather forecast function-------------------------------------------
 
@@ -493,7 +559,7 @@ bot.on("message", function (msg) {
   let saveData = function (index) {
 
     (async () => {
-      let item = new Item(index);
+      let item = new models.Item(index);
       item.save();
       await delay(500);
       bot.sendMessage(msg.from.id, "Ваш список теперь выглядит так: ", listActions.open());
@@ -550,7 +616,7 @@ bot.onText(/\/Удалить товар/, (msg) => {
   let chatId = msg.chat.id;
   let items = [];
 
-  Item.find({}, function(err, Items){
+  models.Item.find({}, function(err, Items){
     if (err)
       return (
         bot.sendMessage(chatId, 'Что то пошло не так =(')
@@ -608,7 +674,7 @@ renderShoppingList = (chatId) => {
   let list = '';
   let nmb = 1;
 
-  Item.find({}, function(err, Items){
+  models.Item.find({}, function(err, Items){
     if (err)
       return (
         bot.sendMessage(chatId, 'Что то пошло не так =(')
@@ -658,7 +724,7 @@ removeElement = (index, user, action) => {
   function removeByKey(params){
 
 
-    Item.findByIdAndRemove(params.value, function(err) {
+    models.Item.findByIdAndRemove(params.value, function(err) {
       if (err) {
         return done(err);
       }
@@ -667,7 +733,7 @@ removeElement = (index, user, action) => {
 
   }
 
-  Item.findById(value, function (err, item) {
+  models.Item.findById(value, function (err, item) {
     if (err) {
       return done(err);
     }

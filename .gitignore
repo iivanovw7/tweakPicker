@@ -37,6 +37,7 @@ node_modules/
 jspm_packages/
 config.js
 mongo.js
+meters.js
 
 # TypeScript v1 declaration files
 typings/
