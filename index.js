@@ -377,9 +377,9 @@ function getMetersData(chatID) {
         console.log(Meter);
         coldVal = Meter.cold;
         hotVal = Meter.hot;
-        await delay(100);
+        await delay(500);
         bot.sendMessage(chatID, 'Адрес: ' + Meter.address);
-        await delay(100);
+        await delay(500);
         showInitialStates();
 
       })();
@@ -392,8 +392,17 @@ function getMetersData(chatID) {
   function showInitialStates() {
     console.log('Cold water: ' + (coldVal/100));
     console.log('Hot water: ' + (hotVal/100));
-    bot.sendMessage(chatID, 'Холодная вода: ' + (coldVal/100) + ' m3', serviceActions.open());
-    bot.sendMessage(chatID, 'Горячая  вода: ' + (hotVal/100) + ' m3', serviceActions.open());
+
+    (async () => {
+
+      await delay(500);
+      bot.sendMessage(chatID, 'Холодная вода: ' + (coldVal/100) + ' m3', serviceActions.open());
+      await delay(500);
+      bot.sendMessage(chatID, 'Горячая  вода: ' + (hotVal/100) + ' m3', serviceActions.open());
+
+    })();
+
+
   }
 
 }
