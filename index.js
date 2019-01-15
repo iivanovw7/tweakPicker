@@ -378,8 +378,8 @@ function getMetersData(chatID) {
         coldVal = Meter.cold;
         hotVal = Meter.hot;
         await delay(500);
-        bot.sendMessage(chatID, 'Адрес: ' + Meter.address);
-        await delay(500);
+        //bot.sendMessage(chatID, 'Адрес: ' + Meter.address);
+        //await delay(500);
         showInitialStates();
 
       })();
