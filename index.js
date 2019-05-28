@@ -124,17 +124,17 @@ bot.onText(/\/Chuck/, (msg) => {
 
 //Scheduled functions----------------------------------------------------------
 
-schedule.scheduleJob('0 6 * * *', () => {
-  getBalance(config.myChatID, config.RIG01_id)
-});
-
-schedule.scheduleJob('0 12 * * *', () => {
-  getBalance(config.myChatID, config.RIG01_id)
-});
-
-schedule.scheduleJob('0 15 * * *', () => {
-  getBalance(config.myChatID, config.RIG01_id)
-});
+// schedule.scheduleJob('0 6 * * *', () => {
+//   getBalance(config.myChatID, config.RIG01_id)
+// });
+//
+// schedule.scheduleJob('0 12 * * *', () => {
+//   getBalance(config.myChatID, config.RIG01_id)
+// });
+//
+// schedule.scheduleJob('0 15 * * *', () => {
+//   getBalance(config.myChatID, config.RIG01_id)
+// });
 
 
 //-----------------------------------------------------------------------------
@@ -149,7 +149,6 @@ const serviceActions = new ReplyKeyboard();
 serviceActions
   .addRow("/Get_ChatID", "/PoolStats")
   .addRow("/XMRrates", "/Balance")
-  .addRow("/Счетчики")
   .addRow("/Назад");
 
 bot.onText(/\/Service/, (msg) => {
@@ -334,78 +333,6 @@ bot.onText(/\/Balance/, (msg) => {
 });
 
 
-bot.onText(/\/Счетчики/, (msg) => {
-  let chatId = config.myChatID;
-  let senderChatID = msg.chat.id;
-
-  console.log(chatId);
-  console.log(senderChatID);
-
-  (async () => {
-
-    await delay(500);
-    bot.sendMessage(chatId, 'Загружаю показания...', serviceActions.open());
-    await delay(1000);
-    getMetersData(chatId)
-
-  })();
-
-});
-
-//Rasp-meters functions-----------------------------------------------
-
-function getMetersData(chatID) {
-
-  let coldVal = 0;
-  let hotVal = 0;
-  //let address = '';
-
-
-  const id = '5c2bd186e7179a49f40a90e3';
-  models.Meters.findById(id, function (err, Meter) {
-    //console.log("Getting meters data...");
-    if (err) {
-      return err;
-    }
-
-    if (Meter) {
-
-
-      (async () => {
-
-        await delay(500);
-        console.log(Meter);
-        coldVal = Meter.cold;
-        hotVal = Meter.hot;
-        await delay(500);
-        //bot.sendMessage(chatID, 'Адрес: ' + Meter.address);
-        //await delay(500);
-        showInitialStates();
-
-      })();
-
-
-    }
-
-  });
-
-  function showInitialStates() {
-    console.log('Cold water: ' + (coldVal/100));
-    console.log('Hot water: ' + (hotVal/100));
-
-    (async () => {
-
-      await delay(500);
-      bot.sendMessage(chatID, 'Холодная вода: ' + (coldVal/100) + ' m3', serviceActions.open());
-      await delay(500);
-      bot.sendMessage(chatID, 'Горячая  вода: ' + (hotVal/100) + ' m3', serviceActions.open());
-
-    })();
-
-
-  }
-
-}
 
 
 //
