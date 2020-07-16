@@ -21,7 +21,7 @@
     "https": "^1.0.0",
     "jsdom": "^11.11.0",
     "jsonwebtoken": "^8.3.0",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.19",
     "moment": "^2.22.2",
     "mongoose": "^5.1.5",
     "morgan": "^1.9.0",
